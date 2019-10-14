@@ -28,7 +28,7 @@ int main()
 
     //---- Build and reuse the matcher
 
-    auto match_ = build_matcher(
+    auto match_ = make_matcher(
         case_{ _, "Carl Bussey"s } | print_me,
         case_{ _, arg            } | print_unknown
     );

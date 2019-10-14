@@ -23,7 +23,7 @@ auto as_tuple(const TestStruct& t)
     return std::tie(t.i, t.j, t.k);
 }
 
-TEST_CASE( "build_matcher: matching tuple with no args" )
+TEST_CASE( "make_matcher: matching tuple with no args" )
 {
     using namespace clo;
 
@@ -31,7 +31,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
     {
         bool executed = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, _, _ } | [&](){ executed = true; }
         );
         match_(TestStruct{ 1, 2, 3 });
@@ -43,7 +43,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
     {
         bool executed = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ 2, 2, 1 } | [](){},
             case_{ 1, 2, 1 } | [&](){ executed = true; }
         );
@@ -56,7 +56,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
     {
         bool executed = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ 2, 2, 1 } | [&](){ executed = true; },
             case_{ 1, 2, 1 } | [&](){ executed = true; }
         );
@@ -69,7 +69,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
     {
         bool executed = false;
 
-        auto match_ = build_matcher();
+        auto match_ = make_matcher();
         match_(TestStruct{666, 2, 1});
 
         CHECK( executed == false );
@@ -77,7 +77,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
 
     SECTION( "one case, return type, expected return is returned" )
     {
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, _ } | []{ return 50; }
         );
         auto ret = match_(TestStruct{666, 2, 1});
@@ -86,7 +86,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
     }
 }
 
-TEST_CASE( "build_matcher: matching tuple with args" )
+TEST_CASE( "make_matcher: matching tuple with args" )
 {
     using namespace clo;
 
@@ -94,7 +94,7 @@ TEST_CASE( "build_matcher: matching tuple with args" )
     {
         bool executed_with_correct_arg = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(TestStruct{ 1, 2, 3 });
@@ -106,7 +106,7 @@ TEST_CASE( "build_matcher: matching tuple with args" )
     {
         bool executed_with_correct_args = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, arg, arg } | [&](auto arg1, auto arg2){
                 executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
             }
@@ -117,7 +117,7 @@ TEST_CASE( "build_matcher: matching tuple with args" )
     }
 }
 
-TEST_CASE( "build_matcher: matching array with args" )
+TEST_CASE( "make_matcher: matching array with args" )
 {
     using namespace clo;
 
@@ -125,7 +125,7 @@ TEST_CASE( "build_matcher: matching array with args" )
     {
         bool executed_with_correct_arg = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(std::array<int, 3>{ 1, 2, 3 });
@@ -137,7 +137,7 @@ TEST_CASE( "build_matcher: matching array with args" )
     {
         bool executed_with_correct_args = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, arg, arg } | [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
         match_(std::array<int, 3>{ 1, 2, 3 });
@@ -146,7 +146,7 @@ TEST_CASE( "build_matcher: matching array with args" )
     }
 }
 
-TEST_CASE( "build_matcher: matching vector with args" )
+TEST_CASE( "make_matcher: matching vector with args" )
 {
     using namespace clo;
 
@@ -154,7 +154,7 @@ TEST_CASE( "build_matcher: matching vector with args" )
     {
         bool executed_with_correct_arg = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(std::vector<int>{ 1, 2, 3 });
@@ -166,7 +166,7 @@ TEST_CASE( "build_matcher: matching vector with args" )
     {
         bool executed_with_correct_args = false;
 
-        auto match_ = build_matcher(
+        auto match_ = make_matcher(
             case_{ _, arg, arg } | [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
         match_(std::vector<int>{ 1, 2, 3 });

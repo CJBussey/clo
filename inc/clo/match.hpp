@@ -116,7 +116,7 @@ constexpr auto operator|(Case&& c, Func&& f)
     CLO_RETURN(( detail::case_holder{ std::forward<typename Case::pattern_type>(c.pattern), std::forward<Func>(f) } ))
 
 template <typename ...CaseHolders>
-constexpr auto build_matcher(CaseHolders&&... cases)
+constexpr auto make_matcher(CaseHolders&&... cases)
 {
     if constexpr (sizeof...(CaseHolders) != 0)
     {
@@ -134,7 +134,7 @@ template <typename T>
 constexpr auto match(T&& v)
 {
     return [v = std::forward<T>(v)](auto&&... cases) {
-        return build_matcher(std::forward<decltype(cases)>(cases)...)(v);
+        return make_matcher(std::forward<decltype(cases)>(cases)...)(v);
     };
 }
 
