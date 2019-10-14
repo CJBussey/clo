@@ -88,10 +88,8 @@ constexpr auto match_impl(Value&& v, MatcherTuple&& matchers)
     }
 }
 
-}
-
 template <typename Pattern, typename Handler>
-struct case_
+struct case_holder
 {
     using pattern_type = Pattern;
     using handler_type = Handler;
@@ -101,12 +99,26 @@ struct case_
 };
 
 template <typename Pattern, typename Handler>
-case_(Pattern&&, Handler&&) -> case_<std::decay_t<Pattern>, std::decay_t<Handler>>;
+case_holder(Pattern&&, Handler&&) -> case_holder<std::decay_t<Pattern>, std::decay_t<Handler>>;
 
-template <typename ...Cases>
-constexpr auto build_matcher(Cases&&... cases)
+}
+
+template <typename ...PatternArgs>
+struct case_
 {
-    if constexpr (sizeof...(Cases) != 0)
+    using pattern_type = pattern<PatternArgs...>;
+    case_(PatternArgs... args) : pattern{std::forward<PatternArgs>(args)...} {}
+    pattern_type pattern;
+};
+
+template <typename Case, typename Func>
+constexpr auto operator|(Case&& c, Func&& f)
+    CLO_RETURN(( detail::case_holder{ std::forward<typename Case::pattern_type>(c.pattern), std::forward<Func>(f) } ))
+
+template <typename ...CaseHolders>
+constexpr auto build_matcher(CaseHolders&&... cases)
+{
+    if constexpr (sizeof...(CaseHolders) != 0)
     {
         return [cases = std::make_tuple(cases...)](auto&& v) {
             return detail::match_impl<0>(std::forward<decltype(v)>(v), cases);

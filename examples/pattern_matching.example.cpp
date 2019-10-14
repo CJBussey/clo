@@ -29,8 +29,8 @@ int main()
     //---- Build and reuse the matcher
 
     auto match_ = build_matcher(
-        case_{ pattern{ _, "Carl Bussey"s }, print_me      },
-        case_{ pattern{ _, arg            }, print_unknown }
+        case_{ _, "Carl Bussey"s } | print_me,
+        case_{ _, arg            } | print_unknown
     );
 
     match_( Person{ 28,  "Carl Bussey"        } );
@@ -39,7 +39,7 @@ int main()
     //----- Immediately invoke a matcher
 
     match( Person{ 28, "Carl Bussey" } )(
-        case_{ pattern{ _, "Carl Bussey"s }, print_me      },
-        case_{ pattern{ _, arg            }, print_unknown }
+        case_{ _, "Carl Bussey"s } | print_me,
+        case_{ _, arg            } | print_unknown
     );
 }

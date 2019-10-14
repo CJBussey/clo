@@ -32,7 +32,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
         bool executed = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, _, _ }, [&](){ executed = true; } }
+            case_{ _, _, _ } | [&](){ executed = true; }
         );
         match_(TestStruct{ 1, 2, 3 });
 
@@ -44,8 +44,8 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
         bool executed = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ 2, 2, 1 }, [](){} },
-            case_{ pattern{ 1, 2, 1 }, [&](){ executed = true; } }
+            case_{ 2, 2, 1 } | [](){},
+            case_{ 1, 2, 1 } | [&](){ executed = true; }
         );
         match_(TestStruct{1, 2, 1});
 
@@ -57,8 +57,8 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
         bool executed = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ 2, 2, 1 }, [&](){ executed = true; } },
-            case_{ pattern{ 1, 2, 1 }, [&](){ executed = true; } }
+            case_{ 2, 2, 1 } | [&](){ executed = true; },
+            case_{ 1, 2, 1 } | [&](){ executed = true; }
         );
         match_(TestStruct{666, 2, 1});
 
@@ -78,7 +78,7 @@ TEST_CASE( "build_matcher: matching tuple with no args" )
     SECTION( "one case, return type, expected return is returned" )
     {
         auto match_ = build_matcher(
-            case_{ pattern{ _, _ }, []{ return 50; }}
+            case_{ _, _ } | []{ return 50; }
         );
         auto ret = match_(TestStruct{666, 2, 1});
 
@@ -95,7 +95,7 @@ TEST_CASE( "build_matcher: matching tuple with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+            case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(TestStruct{ 1, 2, 3 });
 
@@ -107,9 +107,9 @@ TEST_CASE( "build_matcher: matching tuple with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
+            case_{ _, arg, arg } | [&](auto arg1, auto arg2){
                 executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
-            } }
+            }
         );
         match_(TestStruct{ 1, 2, 3 });
 
@@ -126,7 +126,7 @@ TEST_CASE( "build_matcher: matching array with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+            case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(std::array<int, 3>{ 1, 2, 3 });
 
@@ -138,9 +138,7 @@ TEST_CASE( "build_matcher: matching array with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
-                executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
-            } }
+            case_{ _, arg, arg } | [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
         match_(std::array<int, 3>{ 1, 2, 3 });
 
@@ -157,7 +155,7 @@ TEST_CASE( "build_matcher: matching vector with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+            case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(std::vector<int>{ 1, 2, 3 });
 
@@ -169,9 +167,7 @@ TEST_CASE( "build_matcher: matching vector with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = build_matcher(
-            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
-                executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
-            } }
+            case_{ _, arg, arg } | [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
         match_(std::vector<int>{ 1, 2, 3 });
 
@@ -188,7 +184,7 @@ TEST_CASE( "match" )
         bool executed_with_correct_arg = false;
 
         match(std::vector<int>{ 1, 2, 3 })(
-            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+            case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
 
         CHECK( executed_with_correct_arg );
@@ -199,9 +195,7 @@ TEST_CASE( "match" )
         bool executed_with_correct_args = false;
 
         match(std::vector<int>{ 1, 2, 3 })(
-            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
-                executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
-            } }
+            case_{ _, arg, arg } | [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
 
         CHECK( executed_with_correct_args );
