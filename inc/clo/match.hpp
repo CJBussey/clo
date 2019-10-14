@@ -48,9 +48,9 @@ constexpr auto apply_tuple_args(Func&& func, ValueAsTuple&& value, std::index_se
 
 template <typename Matcher, typename Value>
 constexpr auto apply_args(Matcher&& matcher, Value&& value, try_t)
-    CLO_RETURN( 
-        apply_tuple_args(matcher.handler, as_tuple(std::forward<Value>(value)), 
-                         arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{}) 
+    CLO_RETURN(
+        apply_tuple_args(matcher.handler, as_tuple(std::forward<Value>(value)),
+                         arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{})
     )
 
 template <typename Func, typename Vector, std::size_t ...Ns>
@@ -62,7 +62,7 @@ constexpr auto apply_vector_args(Func&& func, Vector&& vector, std::index_sequen
 template <typename Matcher, typename Vector>
 constexpr auto apply_args(Matcher&& matcher, Vector&& vector, catch_t)
 {
-    return apply_vector_args(matcher.handler, std::forward<Vector>(vector), 
+    return apply_vector_args(matcher.handler, std::forward<Vector>(vector),
                              arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
 }
 
@@ -91,7 +91,7 @@ constexpr auto match_impl(Value&& v, MatcherTuple&& matchers)
 }
 
 template <typename Pattern, typename Handler>
-struct matcher
+struct case_
 {
     using pattern_type = Pattern;
     using handler_type = Handler;
@@ -101,15 +101,15 @@ struct matcher
 };
 
 template <typename Pattern, typename Handler>
-matcher(Pattern&&, Handler&&) -> matcher<std::decay_t<Pattern>, std::decay_t<Handler>>;
+case_(Pattern&&, Handler&&) -> case_<std::decay_t<Pattern>, std::decay_t<Handler>>;
 
-template <typename ...Matchers>
-constexpr auto match(Matchers&&... ms)
+template <typename ...Cases>
+constexpr auto build_matcher(Cases&&... cases)
 {
-    if constexpr (sizeof...(Matchers) != 0)
+    if constexpr (sizeof...(Cases) != 0)
     {
-        return [matchers = std::make_tuple(ms...)](auto&& v) {
-            detail::match_impl<0>(std::forward<decltype(v)>(v), matchers);
+        return [cases = std::make_tuple(cases...)](auto&& v) {
+            detail::match_impl<0>(std::forward<decltype(v)>(v), cases);
         };
     }
     else

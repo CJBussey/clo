@@ -22,15 +22,15 @@ int main()
     using namespace std::string_literals;
 
     auto print_me = [](){ std::cout << "That's me!\n"; };
-    auto print_unknown = [](const auto& name){ 
+    auto print_unknown = [](const auto& name){
         std::cout << "I didn't know about this person, but they are " << name << "\n";
     };
 
-    auto pattern_matcher = match(
-        matcher{ pattern{ _, "Carl Bussey"s }, print_me },
-        matcher{ pattern{ _, arg            }, print_unknown }
+    auto match = build_matcher(
+        case_{ pattern{ _, "Carl Bussey"s }, print_me },
+        case_{ pattern{ _, arg            }, print_unknown }
     );
 
-    pattern_matcher( Person{ 28,  "Carl Bussey"        } );
-    pattern_matcher( Person{ 666, "wrapped in plastic" } );
+    match( Person{ 28,  "Carl Bussey"        } );
+    match( Person{ 666, "wrapped in plastic" } );
 }

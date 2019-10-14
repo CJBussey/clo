@@ -27,14 +27,14 @@ TEST_CASE( "match: matching tuple with no args" )
 {
     using namespace clo;
 
-    SECTION( "one matcher, matching pattern, executes function" )
+    SECTION( "one cases, matching pattern, executes function" )
     {
         bool executed = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, _, _ }, [&](){ executed = true; } }
+        auto match = build_matcher(
+            case_{ pattern{ _, _, _ }, [&](){ executed = true; } }
         );
-        pattern_matcher(TestStruct{ 1, 2, 3 });
+        match(TestStruct{ 1, 2, 3 });
 
         CHECK( executed );
     }
@@ -43,34 +43,34 @@ TEST_CASE( "match: matching tuple with no args" )
     {
         bool executed = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ 2, 2, 1 }, [](){} },
-            matcher{ pattern{ 1, 2, 1 }, [&](){ executed = true; } }
+        auto match = build_matcher(
+            case_{ pattern{ 2, 2, 1 }, [](){} },
+            case_{ pattern{ 1, 2, 1 }, [&](){ executed = true; } }
         );
-        pattern_matcher(TestStruct{1, 2, 1});
+        match(TestStruct{1, 2, 1});
 
         CHECK( executed );
     }
 
-    SECTION( "two matchers, no matching pattern, function not executed" )
+    SECTION( "two cases, no matching pattern, function not executed" )
     {
         bool executed = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ 2, 2, 1 }, [&](){ executed = true; } },
-            matcher{ pattern{ 1, 2, 1 }, [&](){ executed = true; } }
+        auto match = build_matcher(
+            case_{ pattern{ 2, 2, 1 }, [&](){ executed = true; } },
+            case_{ pattern{ 1, 2, 1 }, [&](){ executed = true; } }
         );
-        pattern_matcher(TestStruct{666, 2, 1});
+        match(TestStruct{666, 2, 1});
 
         CHECK( executed == false );
     }
 
-    SECTION( "no matchers, function not executed" )
+    SECTION( "no cases, function not executed" )
     {
         bool executed = false;
 
-        auto pattern_matcher = match();
-        pattern_matcher(TestStruct{666, 2, 1});
+        auto match = build_matcher();
+        match(TestStruct{666, 2, 1});
 
         CHECK( executed == false );
     }
@@ -84,10 +84,10 @@ TEST_CASE( "match: matching tuple with args" )
     {
         bool executed_with_correct_arg = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+        auto match = build_matcher(
+            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
         );
-        pattern_matcher(TestStruct{ 1, 2, 3 });
+        match(TestStruct{ 1, 2, 3 });
 
         CHECK( executed_with_correct_arg );
     }
@@ -96,12 +96,12 @@ TEST_CASE( "match: matching tuple with args" )
     {
         bool executed_with_correct_args = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){ 
-                executed_with_correct_args = (arg1 == 2) && (arg2 == 3); 
+        auto match = build_matcher(
+            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
+                executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
             } }
         );
-        pattern_matcher(TestStruct{ 1, 2, 3 });
+        match(TestStruct{ 1, 2, 3 });
 
         CHECK( executed_with_correct_args );
     }
@@ -115,10 +115,10 @@ TEST_CASE( "match: matching array with args" )
     {
         bool executed_with_correct_arg = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+        auto match = build_matcher(
+            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
         );
-        pattern_matcher(std::array<int, 3>{ 1, 2, 3 });
+        match(std::array<int, 3>{ 1, 2, 3 });
 
         CHECK( executed_with_correct_arg );
     }
@@ -127,12 +127,12 @@ TEST_CASE( "match: matching array with args" )
     {
         bool executed_with_correct_args = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){ 
-                executed_with_correct_args = (arg1 == 2) && (arg2 == 3); 
+        auto match = build_matcher(
+            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
+                executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
             } }
         );
-        pattern_matcher(std::array<int, 3>{ 1, 2, 3 });
+        match(std::array<int, 3>{ 1, 2, 3 });
 
         CHECK( executed_with_correct_args );
     }
@@ -146,10 +146,10 @@ TEST_CASE( "match: matching vector with args" )
     {
         bool executed_with_correct_arg = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
+        auto match = build_matcher(
+            case_{ pattern{ _, arg, _ }, [&](auto arg){ executed_with_correct_arg = (arg == 2); } }
         );
-        pattern_matcher(std::vector<int>{ 1, 2, 3 });
+        match(std::vector<int>{ 1, 2, 3 });
 
         CHECK( executed_with_correct_arg );
     }
@@ -158,12 +158,12 @@ TEST_CASE( "match: matching vector with args" )
     {
         bool executed_with_correct_args = false;
 
-        auto pattern_matcher = match(
-            matcher{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){ 
-                executed_with_correct_args = (arg1 == 2) && (arg2 == 3); 
+        auto match = build_matcher(
+            case_{ pattern{ _, arg, arg }, [&](auto arg1, auto arg2){
+                executed_with_correct_args = (arg1 == 2) && (arg2 == 3);
             } }
         );
-        pattern_matcher(std::vector<int>{ 1, 2, 3 });
+        match(std::vector<int>{ 1, 2, 3 });
 
         CHECK( executed_with_correct_args );
     }
