@@ -109,7 +109,7 @@ constexpr auto build_matcher(Cases&&... cases)
     if constexpr (sizeof...(Cases) != 0)
     {
         return [cases = std::make_tuple(cases...)](auto&& v) {
-            detail::match_impl<0>(std::forward<decltype(v)>(v), cases);
+            return detail::match_impl<0>(std::forward<decltype(v)>(v), cases);
         };
     }
     else
@@ -118,7 +118,13 @@ constexpr auto build_matcher(Cases&&... cases)
     }
 }
 
-// get the arg indexes
+template <typename T>
+constexpr auto match(T&& v)
+{
+    return [v = std::forward<T>(v)](auto&&... cases) {
+        return build_matcher(std::forward<decltype(cases)>(cases)...)(v);
+    };
+}
 
 
 }

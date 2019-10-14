@@ -26,11 +26,20 @@ int main()
         std::cout << "I didn't know about this person, but they are " << name << "\n";
     };
 
-    auto match = build_matcher(
-        case_{ pattern{ _, "Carl Bussey"s }, print_me },
+    //---- Build and reuse the matcher
+
+    auto match_ = build_matcher(
+        case_{ pattern{ _, "Carl Bussey"s }, print_me      },
         case_{ pattern{ _, arg            }, print_unknown }
     );
 
-    match( Person{ 28,  "Carl Bussey"        } );
-    match( Person{ 666, "wrapped in plastic" } );
+    match_( Person{ 28,  "Carl Bussey"        } );
+    match_( Person{ 666, "wrapped in plastic" } );
+
+    //----- Immediately invoke a matcher
+
+    match( Person{ 28, "Carl Bussey" } )(
+        case_{ pattern{ _, "Carl Bussey"s }, print_me      },
+        case_{ pattern{ _, arg            }, print_unknown }
+    );
 }
