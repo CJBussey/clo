@@ -7,7 +7,7 @@
         noexcept( noexcept( exp ) ) -> decltype( exp ) { return exp; } \
         /**/
 
-namespace clo::detail {
+namespace c_lo::detail {
 
 template <std::size_t N>
 struct meta : meta<N-1> {};

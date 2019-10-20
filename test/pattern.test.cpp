@@ -1,4 +1,4 @@
-#include <clo/pattern.hpp>
+#include <c-lo/pattern.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -10,7 +10,7 @@
 
 TEST_CASE( "pattern: operator==(pattern, tuple)" ) {
 
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "pattern<any> and tuple<T> returns true" ) {
         auto sut = pattern{ _, _ };
@@ -44,7 +44,7 @@ TEST_CASE( "pattern: operator==(pattern, tuple)" ) {
 
 TEST_CASE( "pattern: operator==(pattern, array)" ) {
 
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "pattern<any> and array<T> returns true" ) {
         auto sut = pattern{ _, _ };
@@ -78,7 +78,7 @@ TEST_CASE( "pattern: operator==(pattern, array)" ) {
 
 TEST_CASE( "pattern: operator==(pattern, vector)" ) {
 
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "pattern<any> and vector<T> returns true" ) {
         auto sut = pattern{ _, _ };
@@ -125,7 +125,7 @@ auto as_tuple(const TestStruct& s)
 
 TEST_CASE( "pattern: operator==(pattern, struct)" ) {
 
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "pattern<any> and struct returns true" ) {
         auto sut = pattern{ _, _, _ };
@@ -176,7 +176,7 @@ auto operator|(Range&& r, reverse_t)
 
 TEST_CASE( "pattern: operator==(pattern, range)" ) {
 
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "pattern<any> and struct returns true" ) {
         auto sut = pattern{ _, _, _ };

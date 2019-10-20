@@ -1,5 +1,5 @@
-#include <clo/match.hpp>
-#include <clo/pattern.hpp>
+#include <c-lo/match.hpp>
+#include <c-lo/pattern.hpp>
 
 #include <array>
 #include <iostream>
@@ -17,7 +17,7 @@ auto as_tuple(const Numbers& n)
 
 int main()
 {
-    using namespace clo;
+    using namespace c_lo;
     
     std::vector<int> vector              { 0, 1, 2, 3, 4 };
     std::array<int, 5> array             { 4, 3, 2, 1, 0 };

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <clo/detail/meta.hpp>
+#include <c-lo/detail/meta.hpp>
 
 #include <cstddef>
 #include <iterator>
 
-namespace clo::detail {
+namespace c_lo::detail {
 
 template <typename Range>
 constexpr auto size(const Range& r, try_t) CLO_RETURN( std::size(r) )

@@ -3,7 +3,7 @@
 #include <array>
 #include <type_traits>
 
-namespace clo::detail {
+namespace c_lo::detail {
 
 template <typename T>
 struct is_array : std::is_array<T> {};

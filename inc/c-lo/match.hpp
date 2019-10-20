@@ -1,15 +1,15 @@
 #pragma once
 
-#include <clo/as_tuple.hpp>
-#include <clo/detail/meta.hpp>
-#include <clo/pattern.hpp>
+#include <c-lo/as_tuple.hpp>
+#include <c-lo/detail/meta.hpp>
+#include <c-lo/pattern.hpp>
 
 #include <cstddef>
 #include <functional>
 #include <tuple>
 #include <type_traits>
 
-namespace clo {
+namespace c_lo {
 
 namespace detail {
 

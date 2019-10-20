@@ -1,5 +1,5 @@
-#include <clo/match.hpp>
-#include <clo/pattern.hpp>
+#include <c-lo/match.hpp>
+#include <c-lo/pattern.hpp>
 
 #include <iostream>
 #include <string>
@@ -18,7 +18,7 @@ auto as_tuple(const Person& p)
 
 int main()
 {
-    using namespace clo;
+    using namespace c_lo;
     using namespace std::string_literals;
 
     auto print_me = [](){ std::cout << "That's me!\n"; };

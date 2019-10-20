@@ -1,14 +1,14 @@
 #pragma once
 
-#include <clo/as_tuple.hpp>
-#include <clo/detail/range.hpp>
+#include <c-lo/as_tuple.hpp>
+#include <c-lo/detail/range.hpp>
 
 #include <iterator>
 #include <tuple>
 #include <type_traits>
 #include <utility>
 
-namespace clo {
+namespace c_lo {
 
 struct any_t{};
 

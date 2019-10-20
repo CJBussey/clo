@@ -1,5 +1,5 @@
-#include <clo/match.hpp>
-#include <clo/pattern.hpp>
+#include <c-lo/match.hpp>
+#include <c-lo/pattern.hpp>
 
 #include <catch2/catch.hpp>
 
@@ -8,12 +8,12 @@
 // LATER: use function_spy to clean up these tests
 // rather than hand-writing these lambda spies
 
-using static_test_args_t = std::tuple<clo::arg_t, int, clo::arg_t>;
+using static_test_args_t = std::tuple<c_lo::arg_t, int, c_lo::arg_t>;
 
 static_assert(
     std::is_same_v<
         std::index_sequence<0, 2>,
-        clo::detail::arg_indexes_t<static_test_args_t>
+        c_lo::detail::arg_indexes_t<static_test_args_t>
     >
 );
 
@@ -25,7 +25,7 @@ auto as_tuple(const TestStruct& t)
 
 TEST_CASE( "make_matcher: matching tuple with no args" )
 {
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "one case, matching pattern, executes function" )
     {
@@ -88,7 +88,7 @@ TEST_CASE( "make_matcher: matching tuple with no args" )
 
 TEST_CASE( "make_matcher: matching tuple with args" )
 {
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "one case, matching pattern, executes function with correct arg" )
     {
@@ -119,7 +119,7 @@ TEST_CASE( "make_matcher: matching tuple with args" )
 
 TEST_CASE( "make_matcher: matching array with args" )
 {
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "one case, matching pattern, executes function with correct arg" )
     {
@@ -148,7 +148,7 @@ TEST_CASE( "make_matcher: matching array with args" )
 
 TEST_CASE( "make_matcher: matching vector with args" )
 {
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "one case, matching pattern, executes function with correct arg" )
     {
@@ -195,7 +195,7 @@ auto operator|(Range&& r, reverse_t)
 
 TEST_CASE( "make_matcher: matching range with args" )
 {
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "one case, matching pattern, executes function with correct arg" )
     {
@@ -224,7 +224,7 @@ TEST_CASE( "make_matcher: matching range with args" )
 
 TEST_CASE( "match" )
 {
-    using namespace clo;
+    using namespace c_lo;
 
     SECTION( "one case, matching pattern, executes function with correct arg" )
     {

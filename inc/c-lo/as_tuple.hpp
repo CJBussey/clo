@@ -1,7 +1,7 @@
 #pragma once
 
-#include <clo/detail/meta.hpp>
-#include <clo/detail/type_traits.hpp>
+#include <c-lo/detail/meta.hpp>
+#include <c-lo/detail/type_traits.hpp>
 
 #include <array>
 #include <cstddef>
@@ -9,7 +9,7 @@
 #include <utility>
 #include <type_traits>
 
-namespace clo {
+namespace c_lo {
 
 template <typename T>
 struct is_std_tuple : std::false_type {};
