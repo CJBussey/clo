@@ -40,6 +40,16 @@ struct arg_indexes
 template <typename Args>
 using arg_indexes_t = typename arg_indexes<Args, std::tuple_size_v<Args> - 1>::type;
 
+template <typename T>
+constexpr bool is_catch_case_v = false;
+
+template <template <typename...> typename Pattern, typename ...Args>
+constexpr bool is_catch_case_v<Pattern<Args...>> = (std::is_base_of_v<any_t, Args> && ...);
+
+template <typename ...Matchers>
+constexpr bool has_catch_case_v = (is_catch_case_v<typename Matchers::pattern_type> || ...);
+
+
 template <typename Func, typename ValueAsTuple, std::size_t ...Ns>
 constexpr auto apply_tuple_args(Func&& func, ValueAsTuple&& value, std::index_sequence<Ns...>)
 {
@@ -66,26 +76,36 @@ constexpr auto apply_args(Matcher&& matcher, Range&& r, catch_t)
                              arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
 }
 
-template <std::size_t Index, typename Value, typename MatcherTuple>
-constexpr auto match_impl(Value&& v, MatcherTuple&& matchers)
+template <std::size_t Index, typename Value, typename ...Matchers>
+constexpr auto match_impl(Value&& v, const std::tuple<Matchers...>& matchers)
 {
     auto& matcher = std::get<Index>(matchers);
     using return_type = decltype(apply_args(matcher, std::forward<Value>(v), try_t{}));
 
+    static_assert( std::is_void_v<return_type> || has_catch_case_v<Matchers...>,
+                   "Either return void or have a case that covers all patterns." );
+
     if (matcher.pattern == v)
         return apply_args(matcher, std::forward<Value>(v), try_t{});
 
-    if constexpr (Index == std::tuple_size_v<std::decay_t<MatcherTuple>> - 1)
+    if constexpr (Index == sizeof...(Matchers) - 1)
     {
         if constexpr (std::is_void_v<return_type>)
             return;
-        else
-            return return_type{};
     }
     else
     {
-        return match_impl<Index + 1>(std::forward<Value>(v), std::forward<MatcherTuple>(matchers));
+        return match_impl<Index + 1>(std::forward<Value>(v), matchers);
     }
+
+    throw; // unreachable
+}
+
+template <typename Value, typename ...Matchers>
+constexpr auto match(Value&& v, const std::tuple<Matchers...>& matchers)
+{
+
+    return match_impl<0>(std::forward<Value>(v), matchers);
 }
 
 template <typename Pattern, typename Handler>
@@ -107,7 +127,7 @@ template <typename ...PatternArgs>
 struct case_
 {
     using pattern_type = pattern<PatternArgs...>;
-    case_(PatternArgs... args) : pattern{std::forward<PatternArgs>(args)...} {}
+    constexpr case_(PatternArgs... args) : pattern{std::forward<PatternArgs>(args)...} {}
     pattern_type pattern;
 };
 
@@ -115,13 +135,15 @@ template <typename Case, typename Func>
 constexpr auto operator|=(Case&& c, Func&& f)
     CLO_RETURN(( detail::case_holder{ std::forward<typename Case::pattern_type>(c.pattern), std::forward<Func>(f) } ))
 
+inline const case_ default_{ _ };
+
 template <typename ...CaseHolders>
 constexpr auto make_matcher(CaseHolders&&... cases)
 {
     if constexpr (sizeof...(CaseHolders) != 0)
     {
         return [cases = std::make_tuple(cases...)](auto&& v) {
-            return detail::match_impl<0>(std::forward<decltype(v)>(v), cases);
+            return detail::match(std::forward<decltype(v)>(v), cases);
         };
     }
     else

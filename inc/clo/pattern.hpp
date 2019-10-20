@@ -31,8 +31,6 @@ struct pattern
     args_t args;
 };
 
-inline auto otherwise = pattern{ _ };
-
 namespace detail {
 
 template <typename Tuple, typename ...Args>

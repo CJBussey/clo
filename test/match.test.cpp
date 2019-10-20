@@ -247,4 +247,14 @@ TEST_CASE( "match" )
 
         CHECK( executed_with_correct_args );
     }
+
+    struct non_default{ non_default(int){} };
+
+    SECTION( "non-default return possible with catch all case" )
+    {
+        auto result = match(std::vector<int>{ 1, 2, 3 })(
+            case_{ _, _, _ } |= [&]{ return non_default{10}; }
+        ); // should compile
+        std::ignore = result; 
+    }
 }
