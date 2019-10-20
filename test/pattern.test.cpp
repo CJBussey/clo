@@ -196,7 +196,7 @@ TEST_CASE( "pattern: operator==(pattern, range)" ) {
 
     SECTION( "pattern<val> and struct with at least one different values returns false" ) {
         auto sut = pattern{ 666, 1, 2 };
-        auto v = std::vector{ 2, 1, 666 };
+        auto v = std::vector{ 2, 1, 0 };
         auto r = v | reversed;
 
         CHECK( !(sut == r) );
