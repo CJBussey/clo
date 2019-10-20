@@ -4,6 +4,8 @@
 
 #include <array>
 #include <tuple>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 TEST_CASE( "pattern: operator==(pattern, tuple)" ) {
@@ -151,5 +153,60 @@ TEST_CASE( "pattern: operator==(pattern, struct)" ) {
         auto tuple = TestStruct{ 1, 2, 3 };
 
         CHECK( sut == tuple );
+    }
+}
+
+template <typename Range>
+struct reverse_holder
+{
+    auto begin() const { return r.rbegin(); }
+    auto cbegin() const { return r.crbegin(); }
+    auto end() const { return r.rend(); }
+    auto cend() const { return r.crend(); }
+    Range r;
+};
+
+struct reverse_t {} reversed;
+
+template <typename Range>
+auto operator|(Range&& r, reverse_t)
+{
+    return reverse_holder<std::decay_t<Range>>{std::forward<Range>(r)};
+}
+
+TEST_CASE( "pattern: operator==(pattern, range)" ) {
+
+    using namespace clo;
+
+    SECTION( "pattern<any> and struct returns true" ) {
+        auto sut = pattern{ _, _, _ };
+        auto v = std::vector{ 1, 2, 3 };
+        auto r = v | reversed;
+
+        CHECK( sut == r );
+    }
+
+    SECTION( "pattern<val> and struct with equal values returns true" ) {
+        auto sut = pattern{ 666, 665, 664 };
+        auto v = std::vector{ 664, 665, 666 };
+        auto r = v | reversed;
+
+        CHECK( sut == r );
+    }
+
+    SECTION( "pattern<val> and struct with at least one different values returns false" ) {
+        auto sut = pattern{ 666, 1, 2 };
+        auto v = std::vector{ 2, 1, 666 };
+        auto r = v | reversed;
+
+        CHECK( !(sut == r) );
+    }
+
+    SECTION( "pattern with last element any matches true against rest of tuple elements" ) {
+        auto sut = pattern{ _ };
+        auto v = std::vector{ 1, 2, 3 };
+        auto r = v | reversed;
+
+        CHECK( sut == r );
     }
 }

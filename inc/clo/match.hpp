@@ -53,16 +53,16 @@ constexpr auto apply_args(Matcher&& matcher, Value&& value, try_t)
                          arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{})
     )
 
-template <typename Func, typename Vector, std::size_t ...Ns>
-constexpr auto apply_vector_args(Func&& func, Vector&& vector, std::index_sequence<Ns...>)
+template <typename Func, typename Range, std::size_t ...Ns>
+constexpr auto apply_vector_args(Func&& func, Range&& r, std::index_sequence<Ns...>)
 {
-    return std::invoke(std::forward<Func>(func), vector[Ns]...);
+    return std::invoke(std::forward<Func>(func), get(r, Ns)...);
 }
 
-template <typename Matcher, typename Vector>
-constexpr auto apply_args(Matcher&& matcher, Vector&& vector, catch_t)
+template <typename Matcher, typename Range>
+constexpr auto apply_args(Matcher&& matcher, Range&& r, catch_t)
 {
-    return apply_vector_args(matcher.handler, std::forward<Vector>(vector),
+    return apply_vector_args(matcher.handler, std::forward<Range>(r),
                              arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
 }
 

@@ -175,6 +175,53 @@ TEST_CASE( "make_matcher: matching vector with args" )
     }
 }
 
+template <typename Range>
+struct reverse_holder
+{
+    auto begin() const { return r.rbegin(); }
+    auto cbegin() const { return r.crbegin(); }
+    auto end() const { return r.rend(); }
+    auto cend() const { return r.crend(); }
+    Range r;
+};
+
+struct reverse_t {} reversed;
+
+template <typename Range>
+auto operator|(Range&& r, reverse_t)
+{
+    return reverse_holder<std::decay_t<Range>>{std::forward<Range>(r)};
+}
+
+TEST_CASE( "make_matcher: matching range with args" )
+{
+    using namespace clo;
+
+    SECTION( "one case, matching pattern, executes function with correct arg" )
+    {
+        bool executed_with_correct_arg = false;
+
+        auto match_ = make_matcher(
+            case_{ _, arg, _ } | [&](auto arg){ executed_with_correct_arg = (arg == 2); }
+        );
+        match_(std::vector<int>{ 1, 2, 3 } | reversed);
+
+        CHECK( executed_with_correct_arg );
+    }
+
+    SECTION( "one case, matching pattern, executes function with multiple args with correct args" )
+    {
+        bool executed_with_correct_args = false;
+
+        auto match_ = make_matcher(
+            case_{ _, arg, arg } | [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 1); }
+        );
+        match_(std::vector<int>{ 1, 2, 3 } | reversed);
+
+        CHECK( executed_with_correct_args );
+    }
+}
+
 TEST_CASE( "match" )
 {
     using namespace clo;

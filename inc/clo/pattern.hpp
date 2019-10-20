@@ -1,7 +1,9 @@
 #pragma once
 
 #include <clo/as_tuple.hpp>
+#include <clo/detail/range.hpp>
 
+#include <iterator>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -50,34 +52,35 @@ constexpr auto equal(const pattern<Args...>& p, const Tuple& t, try_t)
     return p.args == as_tuple(t);
 }
 
-template <typename Tuple, typename Vector, size_t ...Ns>
-bool equal_elements(const Tuple& t, const Vector& v, std::index_sequence<Ns...>)
+template <typename Tuple, typename Range, size_t ...Ns>
+bool equal_elements(const Tuple& t, const Range& r, std::index_sequence<Ns...>)
 {
-    return ((std::get<Ns>(t) == v[Ns]) && ...);
+    return ((get(r, Ns) == std::get<Ns>(t)) && ...);
 }
 
-template <typename Vector, typename ...Args>
-constexpr auto equal(const pattern<Args...>& p, const Vector& v, catch_t) -> bool
+template <typename Range, typename ...Args>
+constexpr auto equal(const pattern<Args...>& p, const Range& r, catch_t) -> bool
 {
     if constexpr (sizeof...(Args) == 0)
     {
-        return v.empty();
+        return std::empty(r);
     }
     else
     {
         using args_t = typename pattern<Args...>::args_t;
         constexpr auto pattern_size = std::tuple_size_v<args_t>;
 
-        if (pattern_size > v.size())
+        const auto r_size = detail::size(r);
+        if (pattern_size > r_size)
             return false;    
 
         if constexpr (!std::is_same_v<std::tuple_element_t<pattern_size - 1, args_t>, any_t>)
         {
-            if (v.size() != pattern_size)
+            if (r_size != pattern_size)
                 return false;
         }
 
-        return equal_elements(p.args, v, std::make_index_sequence<std::tuple_size_v<args_t>>{});
+        return equal_elements(p.args, r, std::make_index_sequence<std::tuple_size_v<args_t>>{});
     }
 }
 
