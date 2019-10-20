@@ -210,3 +210,22 @@ TEST_CASE( "pattern: operator==(pattern, range)" ) {
         CHECK( sut == r );
     }
 }
+
+TEST_CASE( "nested patterns" ) {
+
+    using namespace c_lo;
+
+    SECTION( "pattern<pattern<any>> returns true for two dimensional vector" ) {
+        auto sut = pattern{ pattern{_, _}, pattern{_, _} };
+        auto v = std::vector{ std::vector{ 1, 2 }, std::vector{ 1, 2 } };
+
+        CHECK( sut == v );
+    }
+
+    SECTION( "pattern<pattern<val>> returns true if matching two dimensional vector" ) {
+        auto sut = pattern{ pattern{_, 2}, pattern{_, 2} };
+        auto v = std::vector{ std::vector{ 1, 2 }, std::vector{ 1, 2 } };
+
+        CHECK( sut == v );
+    }
+}

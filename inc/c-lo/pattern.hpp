@@ -90,4 +90,10 @@ bool operator==(const pattern<Args...>& lhs, const Other& rhs)
     return detail::equal(lhs, rhs, detail::try_t{});
 }
 
+template <typename Other, typename ...Args>
+bool operator==(const Other& lhs, const pattern<Args...>& rhs)
+{
+    return detail::equal(rhs, lhs, detail::try_t{});
+}
+
 }
