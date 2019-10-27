@@ -96,4 +96,16 @@ bool operator==(const Other& lhs, const pattern<Args...>& rhs)
     return detail::equal(rhs, lhs, detail::try_t{});
 }
 
+template <typename Other, typename ...Args>
+bool operator!=(const pattern<Args...>& lhs, const Other& rhs)
+{
+    return !(lhs == rhs);
+}
+
+template <typename Other, typename ...Args>
+bool operator!=(const Other& lhs, const pattern<Args...>& rhs)
+{
+    return !(lhs == rhs);
+}
+
 }
