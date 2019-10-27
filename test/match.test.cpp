@@ -257,4 +257,13 @@ TEST_CASE( "match" )
         ); // should compile
         std::ignore = result; 
     }
+
+    SECTION( "supports returning reference" )
+    {
+        const int i = 666;
+        const auto& result = match(std::make_tuple(10))(
+            case_{ _ } |= [&]() -> decltype(auto) { return std::forward<const int>(i); }
+        );
+        CHECK( &i == &result );
+    }
 }

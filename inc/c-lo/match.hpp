@@ -51,7 +51,7 @@ constexpr bool has_catch_case_v = (is_catch_case_v<typename Matchers::pattern_ty
 
 
 template <typename Func, typename ValueAsTuple, std::size_t ...Ns>
-constexpr auto apply_tuple_args(Func&& func, ValueAsTuple&& value, std::index_sequence<Ns...>)
+constexpr decltype(auto) apply_tuple_args(Func&& func, ValueAsTuple&& value, std::index_sequence<Ns...>)
 {
     return std::invoke(std::forward<Func>(func), std::get<Ns>(value)...);
 }
@@ -64,20 +64,20 @@ constexpr auto apply_args(Matcher&& matcher, Value&& value, try_t)
     )
 
 template <typename Func, typename Range, std::size_t ...Ns>
-constexpr auto apply_vector_args(Func&& func, Range&& r, std::index_sequence<Ns...>)
+constexpr decltype(auto) apply_vector_args(Func&& func, Range&& r, std::index_sequence<Ns...>)
 {
     return std::invoke(std::forward<Func>(func), get(r, Ns)...);
 }
 
 template <typename Matcher, typename Range>
-constexpr auto apply_args(Matcher&& matcher, Range&& r, catch_t)
+constexpr decltype(auto) apply_args(Matcher&& matcher, Range&& r, catch_t)
 {
     return apply_vector_args(matcher.handler, std::forward<Range>(r),
                              arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
 }
 
 template <std::size_t Index, typename Value, typename ...Matchers>
-constexpr auto match_impl(Value&& v, const std::tuple<Matchers...>& matchers)
+constexpr decltype(auto) match_impl(Value&& v, const std::tuple<Matchers...>& matchers)
 {
     auto& matcher = std::get<Index>(matchers);
     using return_type = decltype(apply_args(matcher, std::forward<Value>(v), try_t{}));
@@ -102,9 +102,8 @@ constexpr auto match_impl(Value&& v, const std::tuple<Matchers...>& matchers)
 }
 
 template <typename Value, typename ...Matchers>
-constexpr auto match(Value&& v, const std::tuple<Matchers...>& matchers)
+constexpr decltype(auto) match(Value&& v, const std::tuple<Matchers...>& matchers)
 {
-
     return match_impl<0>(std::forward<Value>(v), matchers);
 }
 
@@ -142,7 +141,7 @@ constexpr auto make_matcher(CaseHolders&&... cases)
 {
     if constexpr (sizeof...(CaseHolders) != 0)
     {
-        return [cases = std::make_tuple(cases...)](auto&& v) {
+        return [cases = std::make_tuple(cases...)](auto&& v) -> decltype(auto) {
             return detail::match(std::forward<decltype(v)>(v), cases);
         };
     }
@@ -153,9 +152,9 @@ constexpr auto make_matcher(CaseHolders&&... cases)
 }
 
 template <typename T>
-constexpr auto match(T&& v)
+constexpr decltype(auto) match(T&& v)
 {
-    return [v = std::forward<T>(v)](auto&&... cases) {
+    return [v = std::forward<T>(v)](auto&&... cases) -> decltype(auto) {
         return make_matcher(std::forward<decltype(cases)>(cases)...)(v);
     };
 }
