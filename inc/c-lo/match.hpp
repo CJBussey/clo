@@ -50,43 +50,45 @@ template <typename ...Matchers>
 constexpr bool has_catch_case_v = (is_catch_case_v<typename Matchers::pattern_type> || ...);
 
 
-template <typename Func, typename ValueAsTuple, std::size_t ...Ns>
-constexpr decltype(auto) apply_tuple_args(Func&& func, ValueAsTuple&& value, std::index_sequence<Ns...>)
+template <typename Func, typename TupleValue, std::size_t ...Ns>
+constexpr decltype(auto) apply_tuple_args(Func&& func, TupleValue&& value, std::index_sequence<Ns...>)
 {
-    return std::invoke(std::forward<Func>(func), std::get<Ns>(value)...);
+    return std::invoke(std::forward<Func>(func), std::get<Ns>(std::forward<TupleValue>(value))...);
 }
 
-template <typename Matcher, typename Value>
-constexpr auto apply_args(Matcher&& matcher, Value&& value, try_t)
-    CLO_RETURN(
-        apply_tuple_args(matcher.handler, as_tuple(std::forward<Value>(value)),
-                         arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{})
-    )
-
 template <typename Func, typename Range, std::size_t ...Ns>
-constexpr decltype(auto) apply_vector_args(Func&& func, Range&& r, std::index_sequence<Ns...>)
+constexpr decltype(auto) apply_range_args(Func&& func, Range&& r, std::index_sequence<Ns...>)
 {
     return std::invoke(std::forward<Func>(func), get(r, Ns)...);
 }
 
-template <typename Matcher, typename Range>
-constexpr decltype(auto) apply_args(Matcher&& matcher, Range&& r, catch_t)
+template <typename T>
+using free_as_tuple = decltype(as_tuple(std::declval<T>()));
+
+template <typename Matcher, typename Value>
+constexpr decltype(auto) apply_value(Matcher&& matcher, Value&& v)
 {
-    return apply_vector_args(matcher.handler, std::forward<Range>(r),
-                             arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
+    if constexpr (is_detected_v<free_as_tuple, Value>)
+    {
+        return apply_tuple_args(std::forward<Matcher>(matcher).handler, as_tuple(std::forward<Value>(v)), arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
+    }
+    else
+    {
+        return apply_range_args(std::forward<Matcher>(matcher).handler, std::forward<Value>(v), arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
+    }
 }
 
 template <std::size_t Index, typename Value, typename ...Matchers>
 constexpr decltype(auto) match_impl(Value&& v, const std::tuple<Matchers...>& matchers)
 {
     auto& matcher = std::get<Index>(matchers);
-    using return_type = decltype(apply_args(matcher, std::forward<Value>(v), try_t{}));
+    using return_type = decltype(apply_value(matcher, std::forward<Value>(v)));
 
     static_assert( std::is_void_v<return_type> || has_catch_case_v<Matchers...>,
                    "Either return void or have a case that covers all patterns." );
 
     if (matcher.pattern == v)
-        return apply_args(matcher, std::forward<Value>(v), try_t{});
+        return apply_value(matcher, std::forward<Value>(v));
 
     if constexpr (Index == sizeof...(Matchers) - 1)
     {
@@ -141,7 +143,7 @@ constexpr auto make_matcher(CaseHolders&&... cases)
 {
     if constexpr (sizeof...(CaseHolders) != 0)
     {
-        return [cases = std::make_tuple(cases...)](auto&& v) -> decltype(auto) {
+        return [cases = std::make_tuple(std::forward<CaseHolders>(cases)...)](auto&& v) -> decltype(auto) {
             return detail::match(std::forward<decltype(v)>(v), cases);
         };
     }
