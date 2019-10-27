@@ -1,5 +1,6 @@
 #pragma once
 
+#include <c-lo/detail/macros.hpp>
 #include <c-lo/detail/meta.hpp>
 #include <c-lo/pattern.hpp>
 #include <c-lo/tied.hpp>
@@ -96,13 +97,13 @@ constexpr decltype(auto) match_impl(Value&& v, const std::tuple<Matchers...>& ma
     {
         if constexpr (std::is_void_v<return_type>)
             return;
+        else
+            DETAIL_CLO_UNREACHABLE();
     }
     else
     {
         return match_impl<Index + 1>(std::forward<Value>(v), matchers);
     }
-
-    throw; // unreachable
 }
 
 template <typename Value, typename ...Matchers>
