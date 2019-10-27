@@ -27,7 +27,7 @@ template <typename ...Args>
 struct pattern
 {
     using args_t = std::tuple<Args...>;
-    pattern(Args... as) : args(std::forward<Args>(as)...) {}
+    constexpr pattern(Args... as) : args(std::forward<Args>(as)...) {}
     args_t args;
 };
 
