@@ -10,8 +10,7 @@ struct Person
     int age;
     std::string name;
 };
-
-auto as_tuple(const Person& p)
+auto tied(const Person& p)
 {
     return std::tie(p.age, p.name);
 }

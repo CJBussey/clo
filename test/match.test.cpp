@@ -18,7 +18,7 @@ static_assert(
 );
 
 struct TestStruct{ int i, j, k; };
-auto as_tuple(const TestStruct& t)
+auto tied(const TestStruct& t)
 {
     return std::tie(t.i, t.j, t.k);
 }

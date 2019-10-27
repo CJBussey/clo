@@ -1,8 +1,8 @@
 #pragma once
 
-#include <c-lo/as_tuple.hpp>
 #include <c-lo/detail/meta.hpp>
 #include <c-lo/pattern.hpp>
+#include <c-lo/tied.hpp>
 
 #include <cstddef>
 #include <functional>
@@ -63,18 +63,20 @@ constexpr decltype(auto) apply_range_args(Func&& func, Range&& r, std::index_seq
 }
 
 template <typename T>
-using free_as_tuple = decltype(as_tuple(std::declval<T>()));
+using free_tied = decltype(tied(std::declval<T>()));
 
 template <typename Matcher, typename Value>
 constexpr decltype(auto) apply_value(Matcher&& matcher, Value&& v)
 {
-    if constexpr (is_detected_v<free_as_tuple, Value>)
+    if constexpr (is_detected_v<free_tied, Value>)
     {
-        return apply_tuple_args(std::forward<Matcher>(matcher).handler, as_tuple(std::forward<Value>(v)), arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
+        return apply_tuple_args(std::forward<Matcher>(matcher).handler, tied(std::forward<Value>(v)),
+                                arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
     }
     else
     {
-        return apply_range_args(std::forward<Matcher>(matcher).handler, std::forward<Value>(v), arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
+        return apply_range_args(std::forward<Matcher>(matcher).handler, std::forward<Value>(v),
+                                arg_indexes_t<typename std::decay_t<Matcher>::pattern_type::args_t>{});
     }
 }
 

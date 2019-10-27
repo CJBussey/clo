@@ -118,7 +118,7 @@ TEST_CASE( "pattern: operator==(pattern, vector)" ) {
 }
 
 struct TestStruct { int i, j, k; };
-auto as_tuple(const TestStruct& s)
+auto tied(const TestStruct& s)
 {
     return std::tie(s.i, s.j, s.k);
 }

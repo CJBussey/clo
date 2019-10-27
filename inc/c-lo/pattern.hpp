@@ -1,7 +1,7 @@
 #pragma once
 
-#include <c-lo/as_tuple.hpp>
 #include <c-lo/detail/range.hpp>
+#include <c-lo/tied.hpp>
 
 #include <iterator>
 #include <tuple>
@@ -35,11 +35,11 @@ namespace detail {
 
 template <typename Tuple, typename ...Args>
 constexpr auto equal(const pattern<Args...>& p, const Tuple& t, try_t)
-    -> decltype(p.args == as_tuple(t))
+    -> decltype(p.args == tied(t))
 {
     using args_t = typename pattern<Args...>::args_t;
     constexpr auto pattern_size = std::tuple_size_v<args_t>;
-    constexpr auto tuple_size = std::tuple_size_v<std::decay_t<decltype(as_tuple(std::declval<Tuple>()))>>;
+    constexpr auto tuple_size = std::tuple_size_v<std::decay_t<decltype(tied(std::declval<Tuple>()))>>;
 
     static_assert(
         pattern_size == tuple_size ||
@@ -47,7 +47,7 @@ constexpr auto equal(const pattern<Args...>& p, const Tuple& t, try_t)
         "Pattern size should be same as tuple size, or the last element should be _"
     );
 
-    return p.args == as_tuple(t);
+    return p.args == tied(t);
 }
 
 template <typename Tuple, typename Range, size_t ...Ns>

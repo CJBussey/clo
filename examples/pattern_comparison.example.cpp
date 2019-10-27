@@ -10,7 +10,7 @@ struct Numbers
 {
     int i, j, k, l;
 };
-auto as_tuple(const Numbers& n)
+auto tied(const Numbers& n)
 {
     return std::tie(n.i, n.j, n.k, n.l);
 }
