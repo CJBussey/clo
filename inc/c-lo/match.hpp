@@ -71,7 +71,6 @@ constexpr bool is_any_pattern_v<any_pattern> = true;
 template <typename ...Matchers>
 constexpr bool has_any_pattern_v = (is_any_pattern_v<std::decay_t<typename Matchers::pattern_type>> || ...);
 
-
 template <typename Func, typename TupleValue, std::size_t ...Ns>
 constexpr decltype(auto) apply_tuple_args(Func&& func, TupleValue&& value, std::index_sequence<Ns...>)
 {
@@ -108,9 +107,6 @@ constexpr decltype(auto) match_impl(Value&& v, const std::tuple<Matchers...>& ma
     auto& matcher = std::get<Index>(matchers);
     using return_type = decltype(apply_value(matcher, std::forward<Value>(v)));
 
-    static_assert(std::is_void_v<return_type> || has_any_pattern_v<Matchers...> || (is_detected_v<free_tied, Value> && has_pattern_with_all_any_elements_v<Matchers...>),
-                  "Either return void or have a case that covers all patterns.");
-
     if (matcher.pattern == v)
         return apply_value(matcher, std::forward<Value>(v));
 
@@ -128,8 +124,14 @@ constexpr decltype(auto) match_impl(Value&& v, const std::tuple<Matchers...>& ma
 }
 
 template <typename Value, typename ...Matchers>
+constexpr bool valid_matchers_v = (std::is_void_v<decltype(apply_value(std::declval<Matchers>(), std::declval<Value>()))> && ...) ||
+                                  has_any_pattern_v<Matchers...> ||
+                                  (is_detected_v<free_tied, Value> && has_pattern_with_all_any_elements_v<Matchers...>);
+
+template <typename Value, typename ...Matchers>
 constexpr decltype(auto) match(Value&& v, const std::tuple<Matchers...>& matchers)
 {
+    static_assert(valid_matchers_v<Value, Matchers...>, "Either return void or have a case that covers all possibilities.");
     return match_impl<0>(std::forward<Value>(v), matchers);
 }
 
@@ -156,15 +158,32 @@ struct case_
     pattern_type pattern;
 };
 
-constexpr struct
+namespace detail {
+
+template <typename T>
+constexpr bool is_case_v = false;
+
+template <typename... Args>
+constexpr bool is_case_v<case_<Args...>> = true;
+
+}
+
+constexpr struct default_t
 {
     using pattern_type = any_pattern;
-    pattern_type pattern;
 } default_{};
 
-template <typename Case, typename Func>
+template <typename Case, typename Func, std::enable_if_t<detail::is_case_v<std::decay_t<Case>>>* = nullptr>
 constexpr auto operator|=(Case&& c, Func&& f)
-    CLO_RETURN(( detail::case_holder{ std::forward<Case>(c).pattern, std::forward<Func>(f) } ))
+{
+    return detail::case_holder{ std::forward<Case>(c).pattern, std::forward<Func>(f) };
+}
+
+template <typename ...PatternArgs, typename Func>
+constexpr auto operator|=(default_t, Func&& f)
+{
+    return detail::case_holder{ default_t::pattern_type{}, std::forward<Func>(f) };
+}
 
 template <typename ...CaseHolders>
 constexpr auto make_matcher(CaseHolders&&... cases)

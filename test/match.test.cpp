@@ -155,8 +155,7 @@ TEST_CASE( "make_matcher: matching vector with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); },
-            default_           |= []{}
+            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(std::vector<int>{ 1, 2, 3 });
 
@@ -168,8 +167,7 @@ TEST_CASE( "make_matcher: matching vector with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); },
-            default_             |= []{}
+            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
         match_(std::vector<int>{ 1, 2, 3 });
 
@@ -204,8 +202,7 @@ TEST_CASE( "make_matcher: matching range with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); },
-            default_           |= []{}
+            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
         match_(std::vector<int>{ 1, 2, 3 } | reversed);
 
@@ -217,8 +214,7 @@ TEST_CASE( "make_matcher: matching range with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 1); },
-            default_             |= []{}
+            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 1); }
         );
         match_(std::vector<int>{ 1, 2, 3 } | reversed);
 
@@ -235,8 +231,7 @@ TEST_CASE( "match" )
         bool executed_with_correct_arg = false;
 
         match(std::vector<int>{ 1, 2, 3 })(
-            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); },
-            default_           |= []{}
+            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); }
         );
 
         CHECK( executed_with_correct_arg );
@@ -247,8 +242,7 @@ TEST_CASE( "match" )
         bool executed_with_correct_args = false;
 
         match(std::vector<int>{ 1, 2, 3 })(
-            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); },
-            default_             |= []{}
+            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
         );
 
         CHECK( executed_with_correct_args );
