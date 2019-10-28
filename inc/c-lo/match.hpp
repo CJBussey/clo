@@ -137,7 +137,7 @@ struct case_
 
 template <typename Case, typename Func>
 constexpr auto operator|=(Case&& c, Func&& f)
-    CLO_RETURN(( detail::case_holder{ std::forward<typename Case::pattern_type>(c.pattern), std::forward<Func>(f) } ))
+    CLO_RETURN(( detail::case_holder{ std::forward<Case>(c).pattern, std::forward<Func>(f) } ))
 
 constexpr case_ default_{ _ };
 
