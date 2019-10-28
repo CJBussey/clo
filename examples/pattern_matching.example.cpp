@@ -20,7 +20,7 @@ int main()
     using namespace c_lo;
     using namespace std::string_literals;
 
-    auto print_me = [](){ std::cout << "That's me!\n"; };
+    auto print_me = []{ std::cout << "That's me!\n"; };
     auto print_unknown = [](const auto& name){
         std::cout << "I didn't know about this person, but they are " << name << "\n";
     };

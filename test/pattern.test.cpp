@@ -33,13 +33,6 @@ TEST_CASE( "pattern: operator==(pattern, tuple)" ) {
         CHECK( !(sut == tuple) );
     }
 
-    SECTION( "pattern with last element any matches true against rest of tuple elements" ) {
-        auto sut = pattern{ _ };
-        auto tuple = std::tuple<int, double, bool>{ 1, 2., false };
-
-        CHECK( sut == tuple );
-    }
-
 }
 
 TEST_CASE( "pattern: operator==(pattern, array)" ) {
@@ -67,13 +60,6 @@ TEST_CASE( "pattern: operator==(pattern, array)" ) {
         CHECK( !(sut == tuple) );
     }
 
-    SECTION( "pattern with last element any matches true against rest of tuple elements" ) {
-        auto sut = pattern{ _ };
-        auto tuple = std::array<int, 3>{ 1, 2, 3 };
-
-        CHECK( sut == tuple );
-    }
-
 }
 
 TEST_CASE( "pattern: operator==(pattern, vector)" ) {
@@ -99,13 +85,6 @@ TEST_CASE( "pattern: operator==(pattern, vector)" ) {
         auto tuple = std::vector<int>{ 0, 666 };
 
         CHECK( !(sut == tuple) );
-    }
-
-    SECTION( "pattern with last element any matches true against rest of tuple elements" ) {
-        auto sut = pattern{ _ };
-        auto tuple = std::vector<int>{ 1, 2, 3 };
-
-        CHECK( sut == tuple );
     }
 
     SECTION( "pattern with no element true against empty vector" ) {
@@ -146,13 +125,6 @@ TEST_CASE( "pattern: operator==(pattern, struct)" ) {
         auto tuple = TestStruct{ 0, 1, 2 };
 
         CHECK( !(sut == tuple) );
-    }
-
-    SECTION( "pattern with last element any matches true against rest of tuple elements" ) {
-        auto sut = pattern{ _ };
-        auto tuple = TestStruct{ 1, 2, 3 };
-
-        CHECK( sut == tuple );
     }
 }
 
@@ -200,14 +172,6 @@ TEST_CASE( "pattern: operator==(pattern, range)" ) {
         auto r = v | reversed;
 
         CHECK( !(sut == r) );
-    }
-
-    SECTION( "pattern with last element any matches true against rest of tuple elements" ) {
-        auto sut = pattern{ _ };
-        auto v = std::vector{ 1, 2, 3 };
-        auto r = v | reversed;
-
-        CHECK( sut == r );
     }
 }
 

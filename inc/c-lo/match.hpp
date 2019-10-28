@@ -24,31 +24,52 @@ template <typename T>
 constexpr bool is_arg_v = is_arg<T>::value;
 
 template <typename Args, std::size_t Index>
-struct arg_indexes;
+struct make_arg_indexes_impl;
 
 template <typename Args>
-struct arg_indexes<Args, 0>
+struct make_arg_indexes_impl<Args, 0>
 {
     using type = append_to_index_sequence_if_t<0, std::index_sequence<>, is_arg_v<std::tuple_element_t<0, Args>>>;
 };
 
 template <typename Args, std::size_t Index>
-struct arg_indexes
+struct make_arg_indexes_impl
 {
-    using type = append_to_index_sequence_if_t<Index, typename arg_indexes<Args, Index - 1>::type, is_arg_v<std::tuple_element_t<Index, Args>>>;
+    using type = append_to_index_sequence_if_t<Index, typename make_arg_indexes_impl<Args, Index - 1>::type, is_arg_v<std::tuple_element_t<Index, Args>>>;
+};
+
+template <typename Args, typename AlwaysVoid>
+struct make_arg_indexes
+{
+    using type = typename make_arg_indexes_impl<Args, std::tuple_size_v<Args> - 1>::type;
 };
 
 template <typename Args>
-using arg_indexes_t = typename arg_indexes<Args, std::tuple_size_v<Args> - 1>::type;
+struct make_arg_indexes<Args, std::enable_if_t<std::tuple_size_v<Args> == 0>>
+{
+    using type = std::index_sequence<>;
+};
+
+template <typename Args>
+using arg_indexes_t = typename make_arg_indexes<Args, void>::type;
 
 template <typename T>
-constexpr bool is_catch_case_v = false;
+constexpr bool all_any_elements_v = false;
 
 template <template <typename...> typename Pattern, typename ...Args>
-constexpr bool is_catch_case_v<Pattern<Args...>> = (std::is_base_of_v<any_t, Args> && ...);
+constexpr bool all_any_elements_v<Pattern<Args...>> = (std::is_base_of_v<any_t, Args> && ...);
 
 template <typename ...Matchers>
-constexpr bool has_catch_case_v = (is_catch_case_v<typename Matchers::pattern_type> || ...);
+constexpr bool has_pattern_with_all_any_elements_v = (all_any_elements_v<std::decay_t<typename Matchers::pattern_type>> || ...);
+
+template <typename Pattern>
+constexpr bool is_any_pattern_v = false;
+
+template <>
+constexpr bool is_any_pattern_v<any_pattern> = true;
+
+template <typename ...Matchers>
+constexpr bool has_any_pattern_v = (is_any_pattern_v<std::decay_t<typename Matchers::pattern_type>> || ...);
 
 
 template <typename Func, typename TupleValue, std::size_t ...Ns>
@@ -87,8 +108,8 @@ constexpr decltype(auto) match_impl(Value&& v, const std::tuple<Matchers...>& ma
     auto& matcher = std::get<Index>(matchers);
     using return_type = decltype(apply_value(matcher, std::forward<Value>(v)));
 
-    static_assert( std::is_void_v<return_type> || has_catch_case_v<Matchers...>,
-                   "Either return void or have a case that covers all patterns." );
+    static_assert(std::is_void_v<return_type> || has_any_pattern_v<Matchers...> || (is_detected_v<free_tied, Value> && has_pattern_with_all_any_elements_v<Matchers...>),
+                  "Either return void or have a case that covers all patterns.");
 
     if (matcher.pattern == v)
         return apply_value(matcher, std::forward<Value>(v));
@@ -135,11 +156,15 @@ struct case_
     pattern_type pattern;
 };
 
+constexpr struct
+{
+    using pattern_type = any_pattern;
+    pattern_type pattern;
+} default_{};
+
 template <typename Case, typename Func>
 constexpr auto operator|=(Case&& c, Func&& f)
     CLO_RETURN(( detail::case_holder{ std::forward<Case>(c).pattern, std::forward<Func>(f) } ))
-
-constexpr case_ default_{ _ };
 
 template <typename ...CaseHolders>
 constexpr auto make_matcher(CaseHolders&&... cases)

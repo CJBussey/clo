@@ -32,7 +32,7 @@ TEST_CASE( "make_matcher: matching tuple with no args" )
         bool executed = false;
 
         auto match_ = make_matcher(
-            case_{ _, _, _ } |= [&](){ executed = true; }
+            case_{ _, _, _ } |= [&]{ executed = true; }
         );
         match_(TestStruct{ 1, 2, 3 });
 
@@ -44,8 +44,8 @@ TEST_CASE( "make_matcher: matching tuple with no args" )
         bool executed = false;
 
         auto match_ = make_matcher(
-            case_{ 2, 2, 1 } |= [](){},
-            case_{ 1, 2, 1 } |= [&](){ executed = true; }
+            case_{ 2, 2, 1 } |= []{},
+            case_{ 1, 2, 1 } |= [&]{ executed = true; }
         );
         match_(TestStruct{1, 2, 1});
 
@@ -57,8 +57,8 @@ TEST_CASE( "make_matcher: matching tuple with no args" )
         bool executed = false;
 
         auto match_ = make_matcher(
-            case_{ 2, 2, 1 } |= [&](){ executed = true; },
-            case_{ 1, 2, 1 } |= [&](){ executed = true; }
+            case_{ 2, 2, 1 } |= [&]{ executed = true; },
+            case_{ 1, 2, 1 } |= [&]{ executed = true; }
         );
         match_(TestStruct{666, 2, 1});
 
@@ -78,9 +78,9 @@ TEST_CASE( "make_matcher: matching tuple with no args" )
     SECTION( "one case, return type, expected return is returned" )
     {
         auto match_ = make_matcher(
-            case_{ _, _ } |= []{ return 50; }
+            case_{ _, _, _ } |= []{ return 50; }
         );
-        auto ret = match_(TestStruct{666, 2, 1});
+        auto ret = match_(TestStruct{666, 2, 7});
 
         CHECK( ret == 50 );
     }
@@ -155,7 +155,8 @@ TEST_CASE( "make_matcher: matching vector with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); }
+            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); },
+            default_           |= []{}
         );
         match_(std::vector<int>{ 1, 2, 3 });
 
@@ -167,7 +168,8 @@ TEST_CASE( "make_matcher: matching vector with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
+            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); },
+            default_             |= []{}
         );
         match_(std::vector<int>{ 1, 2, 3 });
 
@@ -202,7 +204,8 @@ TEST_CASE( "make_matcher: matching range with args" )
         bool executed_with_correct_arg = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); }
+            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); },
+            default_           |= []{}
         );
         match_(std::vector<int>{ 1, 2, 3 } | reversed);
 
@@ -214,7 +217,8 @@ TEST_CASE( "make_matcher: matching range with args" )
         bool executed_with_correct_args = false;
 
         auto match_ = make_matcher(
-            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 1); }
+            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 1); },
+            default_             |= []{}
         );
         match_(std::vector<int>{ 1, 2, 3 } | reversed);
 
@@ -231,7 +235,8 @@ TEST_CASE( "match" )
         bool executed_with_correct_arg = false;
 
         match(std::vector<int>{ 1, 2, 3 })(
-            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); }
+            case_{ _, arg, _ } |= [&](auto arg){ executed_with_correct_arg = (arg == 2); },
+            default_           |= []{}
         );
 
         CHECK( executed_with_correct_arg );
@@ -242,7 +247,8 @@ TEST_CASE( "match" )
         bool executed_with_correct_args = false;
 
         match(std::vector<int>{ 1, 2, 3 })(
-            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); }
+            case_{ _, arg, arg } |= [&](auto arg1, auto arg2){ executed_with_correct_args = (arg1 == 2) && (arg2 == 3); },
+            default_             |= []{}
         );
 
         CHECK( executed_with_correct_args );
@@ -250,12 +256,17 @@ TEST_CASE( "match" )
 
     struct non_default{ non_default(int){} };
 
-    SECTION( "non-default return possible with catch all case" )
+    SECTION( "non-default return possible with default case" )
     {
+        auto d = []{ return non_default{5}; };
+        static_assert(detail::is_any_pattern_v<std::decay_t<std::decay_t<decltype(default_)>::pattern_type>>);
+        static_assert(detail::has_any_pattern_v<decltype(operator|=(default_, d))>);
+
         auto result = match(std::vector<int>{ 1, 2, 3 })(
-            case_{ _, _, _ } |= [&]{ return non_default{10}; }
+            case_{ _, _, _ } |= [&]{ return non_default{10}; },
+            default_         |= [] { return non_default{5};  }
         ); // should compile
-        std::ignore = result; 
+        std::ignore = result;
     }
 
     SECTION( "supports returning reference" )

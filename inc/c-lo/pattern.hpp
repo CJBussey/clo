@@ -31,7 +31,18 @@ struct pattern
     args_t args;
 };
 
+struct any_pattern
+{
+    using args_t = std::tuple<>;
+};
+
 namespace detail {
+
+template <typename PatternTuple, typename Tuple, size_t ...Ns>
+bool equal_tuple_elements(const PatternTuple& t, const Tuple& r, std::index_sequence<Ns...>)
+{
+    return ((get(r, Ns) == std::get<Ns>(t)) && ...);
+}
 
 template <typename Tuple, typename ...Args>
 constexpr auto equal(const pattern<Args...>& p, const Tuple& t, try_t)
@@ -42,9 +53,8 @@ constexpr auto equal(const pattern<Args...>& p, const Tuple& t, try_t)
     constexpr auto tuple_size = std::tuple_size_v<std::decay_t<decltype(tied(std::declval<Tuple>()))>>;
 
     static_assert(
-        pattern_size == tuple_size ||
-        std::is_same_v<std::tuple_element_t<pattern_size - 1, args_t>, any_t>,
-        "Pattern size should be same as tuple size, or the last element should be _"
+        pattern_size == tuple_size,
+        "Pattern size should be same as tuple size"
     );
 
     return p.args == tied(t);
@@ -69,14 +79,8 @@ constexpr auto equal(const pattern<Args...>& p, const Range& r, catch_t) -> bool
         constexpr auto pattern_size = std::tuple_size_v<args_t>;
 
         const auto r_size = detail::size(r);
-        if (pattern_size > r_size)
-            return false;    
-
-        if constexpr (!std::is_same_v<std::tuple_element_t<pattern_size - 1, args_t>, any_t>)
-        {
-            if (r_size != pattern_size)
-                return false;
-        }
+        if (pattern_size != r_size)
+            return false;
 
         return equal_elements(p.args, r, std::make_index_sequence<std::tuple_size_v<args_t>>{});
     }
@@ -106,6 +110,30 @@ template <typename Other, typename ...Args>
 bool operator!=(const Other& lhs, const pattern<Args...>& rhs)
 {
     return !(lhs == rhs);
+}
+
+template <typename Other>
+constexpr bool operator==(const any_pattern&, const Other&)
+{
+    return true;
+}
+
+template <typename Other>
+constexpr bool operator==(const Other&, const any_pattern&)
+{
+    return true;
+}
+
+template <typename Other>
+constexpr bool operator!=(const any_pattern&, const Other&)
+{
+    return false;
+}
+
+template <typename Other>
+constexpr bool operator!=(const Other&, const any_pattern&)
+{
+    return false;
 }
 
 }
