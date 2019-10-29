@@ -4,14 +4,15 @@
 #include <string>
 #include <tuple>
 
+// clang-format off
+
 int main()
 {
     using namespace c_lo;
     using namespace std::string_literals;
 
     match(std::make_tuple("Somebody Else"s))(
-        case_{ "Carl Bussey"s   } |= []{ std::cout << "That's me!\n"; },
-        case_{ "Somebody Else"s } |= []{ std::cout << "That is not me...\n"; },
-        default_                  |= []{}
-    );
+        case_{"Carl Bussey"s}   |= [] { std::cout << "That's me!\n"; },
+        case_{"Somebody Else"s} |= [] { std::cout << "That is not me...\n"; },
+        default_                |= [] {});
 }
